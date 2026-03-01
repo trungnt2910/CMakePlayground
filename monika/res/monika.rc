@@ -1,0 +1,330 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    MA_STRING_EXCEPTION_COMMAND_NAME_CONFLICT
+                            "A subcommand or switch of the same name has already been registered."
+    MA_STRING_EXCEPTION_INVALID_DRIVER_PATH
+                            "'{}' is not a path to a valid Windows driver."
+    MA_STRING_EXCEPTION_VALUE_EXPECTED "Expected a value for {}."
+    MA_STRING_EXCEPTION_CORE_DRIVER_NOT_FOUND
+                            "The core driver is not installed. Please specify a path to 'lxcore.sys' from AoW or WSL using the '--core' option."
+    MA_STRING_EXCEPTION_BORROWED_SERVICE_NOT_FOUND
+                            "No borrowable core service found on the system."
+    MA_STRING_EXCEPTION_BORROWED_SERVICE_INVALID
+                            "The specified service is not a whitelisted core driver service."
+    MA_STRING_EXCEPTION_DEFAULT_DRIVER_PATH_NOT_FOUND
+                            "Cannot find 'lxmonika.sys' at the executable's directory. Please check your installation or supply a driver path to the command."
+    MA_STRING_EXCEPTION_LXMONIKA_NOT_INSTALLED
+                            "lxmonika is not installed. Please run 'monika install' and try again."
+    MA_STRING_EXCEPTION_LXMONIKA_ALREADY_INSTALLED
+                            "lxmonika is already installed. To install a new version, please run 'monika uninstall' first."
+    MA_STRING_EXCEPTION_LXMONIKA_DEPENDENT_STILL_INSTALLED
+                            "A provider or other service dependent on lxmonika is installed. Please uninstall them and try again."
+    MA_STRING_EXCEPTION_TEST_SIGNING_NOT_ENABLED
+                            "lxmonika requires Windows to be booted in Test Mode."
+END
+
+STRINGTABLE
+BEGIN
+    MA_STRING_EXCEPTION_UNKNOWN_SERVICE
+                            "'{}' is not a registered lxmonika provider."
+    MA_STRING_COMMAND_HELP_USAGE "Usage"
+    MA_STRING_COMMAND_HELP_ARGUMENTS "Arguments"
+    MA_STRING_COMMAND_HELP_COMMANDS "Commands"
+    MA_STRING_COMMAND_HELP_OPTIONS "Options"
+    MA_STRING_COMMAND_HELP_PLACEHOLDER_COMMAND "command"
+    MA_STRING_COMMAND_HELP_PLACEHOLDER_OPTIONS "options"
+    MA_STRING_COMMAND_HELP_COPYRIGHT "Copyright (C) {}{} {}"
+    MA_STRING_COMMAND_HELP_HINT_SUBCOMMAND
+                            "Run '{}' for more information on a command."
+    MA_STRING_COMMAND_SWITCH_HELP_NAME "--help"
+    MA_STRING_COMMAND_SWITCH_HELP_DESCRIPTION "Display this help."
+    MA_STRING_COMMAND_INVALID_SUBCOMMAND "Unknown subcommand: '{}'."
+    MA_STRING_COMMAND_INVALID_OPTION "Unknown option: '{}'."
+    MA_STRING_COMMAND_INVALID_ARGUMENT "Invalid argument: '{}'."
+    MA_STRING_EXEC_COMMAND_NAME "exec"
+    MA_STRING_EXEC_COMMAND_DESCRIPTION
+                            "Execute a Pico process using a lxmonika provider."
+END
+
+STRINGTABLE
+BEGIN
+    MA_STRING_EXEC_COMMAND_ARGUMENT_DESCRIPTION
+                            "The command to be executed by the provider."
+    MA_STRING_EXEC_SWITCH_PROVIDER_NAME_NAME "--provider"
+    MA_STRING_EXEC_SWITCH_PROVIDER_NAME_DESCRIPTION
+                            "The name of the provider as registered by the driver. If not specified, the command will use the first available provider."
+    MA_STRING_EXEC_SWITCH_PROVIDER_ARGS_NAME "--provider-args"
+    MA_STRING_EXEC_SWITCH_PROVIDER_ARGS_DESCRIPTION
+                            "The arguments to be passed to the provider."
+    MA_STRING_EXEC_SWITCH_ROOT_NAME "--root"
+    MA_STRING_EXEC_SWITCH_ROOT_DESCRIPTION
+                            "The file or directory to be used as the root for the new process. If not specified, the command will use the current working directory."
+    MA_STRING_EXEC_SWITCH_CURRENT_DIRECTORY_NAME "--cd"
+    MA_STRING_EXEC_SWITCH_CURRENT_DIRECTORY_DESCRIPTION
+                            "The current directory for the new process."
+    MA_STRING_EXEC_SWITCH_ARGUMENTS_NAME "--"
+    MA_STRING_EXEC_SWITCH_ARGUMENTS_DESCRIPTION
+                            "Pass the remaining command line as-is to the new process."
+    MA_STRING_PARAMETER_NAME_ARGUMENTS "Arguments"
+    MA_STRING_PARAMETER_NAME_DRIVER_PATH "DriverPath"
+    MA_STRING_PARAMETER_NAME_PATH "Path"
+    MA_STRING_PARAMETER_NAME_SERVICE_NAME "ServiceName"
+    MA_STRING_PARAMETER_NAME_STRING "String"
+END
+
+STRINGTABLE
+BEGIN
+    MA_STRING_MONIKA_COMMAND_NAME "monika"
+    MA_STRING_MONIKA_COMMAND_DESCRIPTION "Unified host for lxmonika"
+    MA_STRING_MONIKA_SWITCH_INFO_NAME "--info"
+    MA_STRING_MONIKA_SWITCH_INFO_DESCRIPTION "Display lxmonika information."
+    MA_STRING_MONIKA_JUST_MONIKA "Just Monika?"
+    MA_STRING_INSTALL_COMMAND_NAME "install"
+    MA_STRING_INSTALL_COMMAND_DESCRIPTION "Install lxmonika or a provider."
+    MA_STRING_INSTALL_COMMAND_ARGUMENT_DESCRIPTION
+                            "A path to lxmonika. If not specified, the command will look for 'lxmonika.sys' at the executable file's location."
+    MA_STRING_INSTALL_SWITCH_CORE_NAME "--core"
+    MA_STRING_INSTALL_SWITCH_CORE_DESCRIPTION
+                            "A path to 'lxcore.sys'. If not specified, the command will search the executable file's location."
+    MA_STRING_INSTALL_SWITCH_BORROW_NAME "--borrow"
+    MA_STRING_INSTALL_SWITCH_BORROW_DESCRIPTION
+                            "The name of a core service for lxmonika to borrow. If not specified, the command will search a known list of core services."
+    MA_STRING_INSTALL_SWITCH_ENABLE_LATE_REGISTRATION_NAME
+                            "--enable-late-registration"
+    MA_STRING_INSTALL_SWITCH_ENABLE_LATE_REGISTRATION_DESCRIPTION
+                            "Enable lxmonika late registration using legacy heuristics."
+    MA_STRING_INSTALL_SWITCH_FORCE_NAME "--force"
+    MA_STRING_INSTALL_SWITCH_FORCE_DESCRIPTION
+                            "Bypass system checks while installing lxmonika."
+END
+
+STRINGTABLE
+BEGIN
+    MA_STRING_INSTALL_PROVIDER_COMMAND_NAME "provider"
+    MA_STRING_INSTALL_PROVIDER_COMMAND_DESCRIPTION
+                            "Install a lxmonika-based Pico process provider."
+    MA_STRING_INSTALL_PROVIDER_COMMAND_ARGUMENT_DESCRIPTION
+                            "A path to the provider to be installed."
+    MA_STRING_INSTALL_PROVIDER_SWITCH_SERVICE_NAME_NAME "--name"
+    MA_STRING_INSTALL_PROVIDER_SWITCH_SERVICE_NAME_DESCRIPTION
+                            "The name of the provider service. If not specified, the command will use the driver file name without extension."
+    MA_STRING_INSTALL_PROVIDER_SWITCH_SERVICE_DISPLAY_NAME_NAME
+                            "--display-name"
+    MA_STRING_INSTALL_PROVIDER_SWITCH_SERVICE_DISPLAY_NAME_DESCRIPTION
+                            "The optional display name of the provider service."
+    MA_STRING_UNINSTALL_COMMAND_NAME "uninstall"
+    MA_STRING_UNINSTALL_COMMAND_DESCRIPTION
+                            "Uninstall lxmonika or a provider."
+    MA_STRING_UNINSTALL_PROVIDER_COMMAND_NAME "provider"
+    MA_STRING_UNINSTALL_PROVIDER_COMMAND_DESCRIPTION
+                            "Uninstall a lxmonika-based Pico process provider."
+    MA_STRING_UNINSTALL_PROVIDER_COMMAND_ARGUMENT_DESCRIPTION
+                            "The name of the provider service to be uninstalled. Must match the one registered during installation."
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Vietnamese (Vietnam) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_VIT)
+LANGUAGE LANG_VIETNAMESE, SUBLANG_DEFAULT
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    MA_STRING_EXCEPTION_COMMAND_NAME_CONFLICT
+                            "Một lệnh con hay lựa chọn cùng tên đã được khai báo."
+    MA_STRING_EXCEPTION_INVALID_DRIVER_PATH
+                            "'{}' không phải là đường dẫn đến trình điều khiển cho Windows hợp lệ."
+    MA_STRING_EXCEPTION_VALUE_EXPECTED "Cần một giá trị cho {}."
+    MA_STRING_EXCEPTION_CORE_DRIVER_NOT_FOUND
+                            "Trình điều khiển lõi chưa được cài đặt. Vui lòng đưa một đường dẫn đển 'lxcore.sys' từ AoW hay WSL bằng lựa chọn '--core'."
+    MA_STRING_EXCEPTION_BORROWED_SERVICE_NOT_FOUND
+                            "Không thể tìm một dịch vụ lõi có thể mượn được trên hệ thống."
+    MA_STRING_EXCEPTION_BORROWED_SERVICE_INVALID
+                            "Dịch vụ được cung cấp không phải dịch vụ trình điều khiển lõi trong danh sách trắng."
+    MA_STRING_EXCEPTION_DEFAULT_DRIVER_PATH_NOT_FOUND
+                            "Không thể tìm thấy 'lxmonika.sys' tại thư mục chứa chương trình. Vui lòng kiểm tra cài đặt của bạn hoặc cung cấp một đường dẫn đến trình điều khiển cho câu lệnh."
+    MA_STRING_EXCEPTION_LXMONIKA_NOT_INSTALLED
+                            "lxmonika chưa được cài đặt. Vui lòng chạy 'monika install' và thử lại."
+    MA_STRING_EXCEPTION_LXMONIKA_ALREADY_INSTALLED
+                            "lxmonika đã được cài đặt trước đó. Để cài đặt phiên bản khác, vui lòng chạy 'monika uninstall' rồi thử lại."
+    MA_STRING_EXCEPTION_LXMONIKA_DEPENDENT_STILL_INSTALLED
+                            "Một trình cung cấp hay dịch vụ khác phụ thuộc vào lxmonika đã được cài đặt. Vui lòng gỡ chúng rồi thử lại."
+    MA_STRING_EXCEPTION_TEST_SIGNING_NOT_ENABLED
+                            "lxmonika yêu cầu Windows phải chạy trong chế độ 'Test Mode'."
+END
+
+STRINGTABLE
+BEGIN
+    MA_STRING_EXCEPTION_UNKNOWN_SERVICE
+                            "'{}' không phải là trình cung cấp lxmonika hợp lệ."
+    MA_STRING_COMMAND_HELP_USAGE "Cách sử dụng"
+    MA_STRING_COMMAND_HELP_ARGUMENTS "Tham số"
+    MA_STRING_COMMAND_HELP_COMMANDS "Câu lệnh"
+    MA_STRING_COMMAND_HELP_OPTIONS "Lựa chọn"
+    MA_STRING_COMMAND_HELP_PLACEHOLDER_COMMAND "câu lệnh"
+    MA_STRING_COMMAND_HELP_PLACEHOLDER_OPTIONS "lựa chọn"
+    MA_STRING_COMMAND_HELP_COPYRIGHT "Bản quyền (C) thuộc {}{} {}"
+    MA_STRING_COMMAND_HELP_HINT_SUBCOMMAND
+                            "Chạy '{}' để biết thêm chi tiết về câu lệnh đó."
+    MA_STRING_COMMAND_SWITCH_HELP_NAME "--help"
+    MA_STRING_COMMAND_SWITCH_HELP_DESCRIPTION "Hiển thị trợ giúp này."
+    MA_STRING_COMMAND_INVALID_SUBCOMMAND "Lệnh con không xác định: '{}'."
+    MA_STRING_COMMAND_INVALID_OPTION "Lựa chọn không xác định: '{}'."
+    MA_STRING_COMMAND_INVALID_ARGUMENT "Tham số không hợp lệ: '{}'."
+    MA_STRING_EXEC_COMMAND_NAME "exec"
+    MA_STRING_EXEC_COMMAND_DESCRIPTION
+                            "Chạy một tiến trình Pico bằng trình cung cấp lxmonika."
+END
+
+STRINGTABLE
+BEGIN
+    MA_STRING_EXEC_COMMAND_ARGUMENT_DESCRIPTION
+                            "Dòng lệnh trình cung cấp cần chạy."
+    MA_STRING_EXEC_SWITCH_PROVIDER_NAME_NAME "--provider"
+    MA_STRING_EXEC_SWITCH_PROVIDER_NAME_DESCRIPTION
+                            "Tên trình cung cấp do trình điều khiển đăng ký. Nếu không được cung cấp, câu lệnh sẽ sử dụng trình cung cấp khả dụng đầu tiên."
+    MA_STRING_EXEC_SWITCH_PROVIDER_ARGS_NAME "--provider-args"
+    MA_STRING_EXEC_SWITCH_PROVIDER_ARGS_DESCRIPTION
+                            "Những tham số cần được truyền cho trình cung cấp."
+    MA_STRING_EXEC_SWITCH_ROOT_NAME "--root"
+    MA_STRING_EXEC_SWITCH_ROOT_DESCRIPTION
+                            "Tên tệp hay thư mục được dùng làm thư mục gốc cho tiến trình mới. Nếu không được cung cấp, câu lệnh sẽ sử dụng thư mục làm việc hiện tại."
+    MA_STRING_EXEC_SWITCH_CURRENT_DIRECTORY_NAME "--cd"
+    MA_STRING_EXEC_SWITCH_CURRENT_DIRECTORY_DESCRIPTION
+                            "Thư mục làm việc của tiến trình mới."
+    MA_STRING_EXEC_SWITCH_ARGUMENTS_NAME "--"
+    MA_STRING_EXEC_SWITCH_ARGUMENTS_DESCRIPTION
+                            "Truyền nguyên phần còn lại của dòng lệnh cho tiến trình mới."
+    MA_STRING_PARAMETER_NAME_ARGUMENTS "Arguments"
+    MA_STRING_PARAMETER_NAME_DRIVER_PATH "DriverPath"
+    MA_STRING_PARAMETER_NAME_PATH "Path"
+    MA_STRING_PARAMETER_NAME_SERVICE_NAME "ServiceName"
+    MA_STRING_PARAMETER_NAME_STRING "String"
+END
+
+STRINGTABLE
+BEGIN
+    MA_STRING_MONIKA_COMMAND_NAME "monika"
+    MA_STRING_MONIKA_COMMAND_DESCRIPTION "Trình nền thống nhất cho lxmonika"
+    MA_STRING_MONIKA_SWITCH_INFO_NAME "--info"
+    MA_STRING_MONIKA_SWITCH_INFO_DESCRIPTION "Hiển thị thông tin về lxmonika."
+    MA_STRING_MONIKA_JUST_MONIKA "Chỉ Monika thôi ư?"
+    MA_STRING_INSTALL_COMMAND_NAME "install"
+    MA_STRING_INSTALL_COMMAND_DESCRIPTION
+                            "Cài đặt lxmonika hoặc một trình cung cấp."
+    MA_STRING_INSTALL_COMMAND_ARGUMENT_DESCRIPTION
+                            "Một đường dẫn đến lxmonika. Nếu không được cung cấp, câu lệnh sẽ tìm 'lxmonika.sys' tại vị trí tệp chương trình."
+    MA_STRING_INSTALL_SWITCH_CORE_NAME "--core"
+    MA_STRING_INSTALL_SWITCH_CORE_DESCRIPTION
+                            "Một đường dẫn đến 'lxcore.sys'. Nếu không được cung cấp, câu lệnh sẽ tìm tại vị trí tệp chương trình."
+    MA_STRING_INSTALL_SWITCH_BORROW_NAME "--borrow"
+    MA_STRING_INSTALL_SWITCH_BORROW_DESCRIPTION
+                            "Tên một dịch vụ lõi để lxmonika mượn. Nếu không được cung cấp, câu lệnh sẽ tra một danh sách dịch vụ cốt lõi có sẵn."
+    MA_STRING_INSTALL_SWITCH_ENABLE_LATE_REGISTRATION_NAME
+                            "--enable-late-registration"
+    MA_STRING_INSTALL_SWITCH_ENABLE_LATE_REGISTRATION_DESCRIPTION
+                            "Cho phép lxmonika đăng ký muộn bằng một số mẹo cũ."
+    MA_STRING_INSTALL_SWITCH_FORCE_NAME "--force"
+    MA_STRING_INSTALL_SWITCH_FORCE_DESCRIPTION
+                            "Bỏ qua kiểm tra hệ thống khi cài đặt lxmonika."
+END
+
+STRINGTABLE
+BEGIN
+    MA_STRING_INSTALL_PROVIDER_COMMAND_NAME "provider"
+    MA_STRING_INSTALL_PROVIDER_COMMAND_DESCRIPTION
+                            "Cài đặt một trình cung cấp tiến trình Pico dựa trên lxmonika."
+    MA_STRING_INSTALL_PROVIDER_COMMAND_ARGUMENT_DESCRIPTION
+                            "Một đường dẫn đễn trình cung cấp cần được cài."
+    MA_STRING_INSTALL_PROVIDER_SWITCH_SERVICE_NAME_NAME "--name"
+    MA_STRING_INSTALL_PROVIDER_SWITCH_SERVICE_NAME_DESCRIPTION
+                            "Tên của dịch vụ trình cung cấp. Nếu không được cung cấp, câu lệnh sẽ sử dụng tên của tệp trình điều khiển bỏ phần đuôi."
+    MA_STRING_INSTALL_PROVIDER_SWITCH_SERVICE_DISPLAY_NAME_NAME
+                            "--display-name"
+    MA_STRING_INSTALL_PROVIDER_SWITCH_SERVICE_DISPLAY_NAME_DESCRIPTION
+                            "Tên hiển thị của dịch vụ trình cung cấp. Không bắt buộc."
+    MA_STRING_UNINSTALL_COMMAND_NAME "uninstall"
+    MA_STRING_UNINSTALL_COMMAND_DESCRIPTION
+                            "Gỡ bỏ lxmonika hay một trình cung cấp."
+    MA_STRING_UNINSTALL_PROVIDER_COMMAND_NAME "provider"
+    MA_STRING_UNINSTALL_PROVIDER_COMMAND_DESCRIPTION
+                            "Gỡ bỏ một trình cung cấp tiến trình Pico dựa trên lxmonika."
+    MA_STRING_UNINSTALL_PROVIDER_COMMAND_ARGUMENT_DESCRIPTION
+                            "Tên của dịch vụ trình cung cấp. Bắt buộc phải khớp với tên được đăng ký khi cài đặt."
+END
+
+#endif    // Vietnamese (Vietnam) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

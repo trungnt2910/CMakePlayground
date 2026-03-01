@@ -1,0 +1,420 @@
+#include "Parameter.h"
+
+#include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <vector>
+
+#include "resource.h"
+#include "service.h"
+#include "util.h"
+
+#include "Exception.h"
+
+Parameter::Parameter(
+    int type
+) : Parameter(UtilGetResourceString(type))
+{
+    // Currently no-op.
+}
+
+//
+// AbstractStringParameter
+//
+
+// While this class works exactly the same way as normal StringParameter,
+// we also want others to inherit it as well. If we define StringParameter here,
+// when other classes in this file inherit "StringParameter", MSVC will produce an
+// internal compiler error, possibly due to having the same name as the exported
+// constant, "const Parameter& StringParameter;".
+// Therefore, we create an "AbstractStringParameter" here, then define our
+// invisible StringParameter class later.
+
+class AbstractStringParameter : public Parameter
+{
+public:
+    virtual std::any Parse(int& argc, wchar_t**& argv,
+        const std::type_info& type, bool more) const override final
+    {
+        (void)more;
+
+        std::optional<std::wstring_view> arg;
+
+        if (argc > 0)
+        {
+            --argc;
+            arg = std::wstring_view(*argv);
+            try
+            {
+                if (!Validate(arg.value()))
+                {
+                    throw nullptr;
+                }
+            }
+            catch (Exception&)
+            {
+                throw;
+            }
+            catch (...)
+            {
+                throw Win32Exception(ERROR_INVALID_PARAMETER);
+            }
+            ++argv;
+        }
+
+        return Convert(arg, type);
+    }
+protected:
+    AbstractStringParameter(int type) : Parameter(type) { }
+    virtual bool Validate(const std::wstring_view& arg) const
+    {
+        (void)arg;
+
+        return true;
+    }
+    const std::wstring_view& EnsureHasValue(
+        const std::optional<std::wstring_view>& arg) const
+    {
+        if (!arg.has_value())
+        {
+            throw MonikaException(
+                MA_STRING_EXCEPTION_VALUE_EXPECTED,
+                HRESULT_FROM_WIN32(ERROR_INVALID_PARAMETER),
+                GetName()
+            );
+        }
+        return arg.value();
+    }
+    virtual std::any Convert(const std::optional<std::wstring_view>& arg,
+        const std::type_info& type) const
+    {
+        if (type == typeid(std::string))
+        {
+            const std::wstring_view& value = EnsureHasValue(arg);
+            std::string result;
+            result.resize(value.size());
+            std::transform(value.begin(), value.end(), result.begin(),
+                [](wchar_t wc) { return (char)wc; });
+            return result;
+        }
+        else if (type == typeid(std::wstring))
+        {
+            const std::wstring_view& value = EnsureHasValue(arg);
+            return std::wstring(value);
+        }
+        else if (type == typeid(std::wstring_view))
+        {
+            const std::wstring_view& value = EnsureHasValue(arg);
+            return value;
+        }
+        else if (type == typeid(std::optional<std::string>))
+        {
+            if (arg.has_value())
+            {
+                std::string result;
+                result.resize(arg.value().size());
+                std::transform(arg.value().begin(), arg.value().end(), result.begin(),
+                    [](wchar_t wc) { return (char)wc; });
+                return std::optional(result);
+            }
+            else
+            {
+                return (std::optional<std::wstring>)std::nullopt;
+            }
+        }
+        else if (type == typeid(std::optional<std::wstring>))
+        {
+            return arg.has_value() ?
+                std::optional(std::wstring(arg.value())) : std::nullopt;
+        }
+        else if (type == typeid(std::optional<std::wstring_view>))
+        {
+            return arg.has_value() ?
+                std::optional(arg) : std::nullopt;
+        }
+        return nullptr;
+    }
+};
+
+//
+// AbstractPathParameter
+//
+
+class AbstractPathParameter : public AbstractStringParameter
+{
+protected:
+    AbstractPathParameter(int type) : AbstractStringParameter(type) { }
+    virtual std::any Convert(const std::optional<std::wstring_view>& arg,
+        const std::type_info& type) const override
+    {
+        if (type == typeid(std::filesystem::path))
+        {
+            const std::wstring_view& value = EnsureHasValue(arg);
+            return std::filesystem::path(value);
+        }
+        else if (type == typeid(std::optional<std::filesystem::path>))
+        {
+            return arg.has_value() ?
+                std::optional(std::filesystem::path(arg.value())) : std::nullopt;
+        }
+        else
+        {
+            return AbstractStringParameter::Convert(arg, type);
+        }
+    }
+};
+
+//
+// NullParameter
+//
+
+auto NullParameterObj = ([]()
+{
+    static const class NullParameter : public Parameter
+    {
+    public:
+        NullParameter() : Parameter(L"") { }
+        virtual std::any Parse(int& argc, wchar_t**& argv,
+            const std::type_info& type, bool more) const
+        {
+            (void)argc;
+            (void)argv;
+            (void)more;
+
+            if (type == typeid(std::ignore))
+            {
+                return std::ignore;
+            }
+            else if (type == typeid(bool))
+            {
+                return true;
+            }
+            else if (type == typeid(std::wstring))
+            {
+                return std::wstring();
+            }
+            else if (type == typeid(std::wstring_view))
+            {
+                return std::wstring_view();
+            }
+
+            return nullptr;
+        }
+    } NullParameter;
+
+    return NullParameter;
+})();
+
+constinit const Parameter& NullParameter = NullParameterObj;
+
+//
+// ArgumentsParameter
+//
+
+auto ArgumentsParameterObj = ([]()
+{
+    static const class ArgumentsParameter : public Parameter
+    {
+    public:
+        ArgumentsParameter() : Parameter(MA_STRING_PARAMETER_NAME_ARGUMENTS) { }
+        virtual std::any Parse(int& argc, wchar_t**& argv,
+            const std::type_info& type, bool more) const override
+        {
+            std::vector<const wchar_t*> vectorChosenArgs;
+
+            while (argc > 0)
+            {
+                if (more && wcscmp(argv[0], L"--") == 0)
+                {
+                    // "--" marks the end of the current argument list.
+                    // Bail out, unless we don't accept any more arguments,
+                    // in which case we might want to take everything.
+                    break;
+                }
+
+                vectorChosenArgs.push_back(argv[0]);
+                --argc;
+                ++argv;
+            }
+
+            const auto Convert = [&]<typename Container>()
+            {
+                Container containerResult;
+                containerResult.reserve(vectorChosenArgs.size());
+                std::transform(
+                    vectorChosenArgs.begin(),
+                    vectorChosenArgs.end(),
+                    std::back_inserter(containerResult),
+                    [](const wchar_t* pStr) { return typename Container::value_type(pStr); }
+                );
+                return containerResult;
+            };
+
+            if (type == typeid(std::vector<const wchar_t*>))
+            {
+                return vectorChosenArgs;
+            }
+            else if (type == typeid(std::vector<std::wstring_view>))
+            {
+                return Convert
+                    .template operator()<std::vector<std::wstring_view>>();
+            }
+            else if (type == typeid(std::vector<std::wstring>))
+            {
+                return Convert
+                    .template operator()<std::vector<std::wstring>>();
+            }
+            return nullptr;
+        }
+    } ArgumentsParameter;
+
+    return ArgumentsParameter;
+})();
+
+constinit const Parameter& ArgumentsParameter = ArgumentsParameterObj;
+
+//
+// StringParameter
+//
+
+auto StringParameterObj = ([]()
+{
+    static const class StringParameter : public AbstractStringParameter
+    {
+    public:
+        StringParameter() : AbstractStringParameter(MA_STRING_PARAMETER_NAME_STRING) { }
+    } StringParameter;
+
+    return StringParameter;
+})();
+
+constinit const Parameter& StringParameter = StringParameterObj;
+
+//
+// DriverPathParameter
+//
+
+auto DriverPathParameterObj = ([]()
+{
+    static const class DriverPathParameter : public AbstractPathParameter
+    {
+    public:
+        DriverPathParameter() : AbstractPathParameter(MA_STRING_PARAMETER_NAME_DRIVER_PATH) { }
+    protected:
+        virtual bool Validate(const std::wstring_view& arg) const override
+        {
+            try
+            {
+                // Check extension.
+                if (std::filesystem::path(arg).extension().wstring() != L".sys")
+                {
+                    throw nullptr;
+                }
+
+                // Check exists and PE magic.
+                std::ifstream fin;
+                fin.open(arg, std::ios_base::in | std::ios_base::binary);
+                char buffer[2] = { };
+                fin.read(buffer, 2);
+                if (buffer[0] != 'M' || buffer[1] != 'Z')
+                {
+                    throw nullptr;
+                }
+            }
+            catch (...)
+            {
+                throw MonikaException(
+                    MA_STRING_EXCEPTION_INVALID_DRIVER_PATH,
+                    HRESULT_FROM_WIN32(ERROR_INVALID_PARAMETER),
+                    arg
+                );
+            }
+
+            return AbstractPathParameter::Validate(arg);
+        }
+    } DriverPathParameter;
+
+    return DriverPathParameter;
+})();
+
+constinit const Parameter& DriverPathParameter = DriverPathParameterObj;
+
+//
+// PathParameter
+//
+
+auto PathParameterObj = ([]()
+{
+    static const class PathParameter : public AbstractPathParameter
+    {
+    public:
+        PathParameter() : AbstractPathParameter(MA_STRING_PARAMETER_NAME_PATH) { }
+    } PathParameter;
+
+    return PathParameter;
+})();
+
+constinit const Parameter& PathParameter = PathParameterObj;
+
+//
+// ServiceNameParameter
+//
+
+auto ServiceNameParameterObj = ([]()
+{
+    static const class ServiceNameParameter : public AbstractStringParameter
+    {
+    public:
+        ServiceNameParameter() : AbstractStringParameter(MA_STRING_PARAMETER_NAME_SERVICE_NAME) { }
+    protected:
+        virtual bool Validate(const std::wstring_view& arg) const override
+        {
+            try
+            {
+                auto manager = UtilGetSharedServiceHandle(OpenSCManagerW(
+                    NULL, NULL, SC_MANAGER_CREATE_SERVICE | SC_MANAGER_ENUMERATE_SERVICE
+                ));
+
+                std::vector<char> buffer;
+                std::span<const ENUM_SERVICE_STATUSW> spanEnumSerivceStatus =
+                    SvGetLxMonikaDependentServices(manager, buffer);
+
+                if (std::none_of(
+                    spanEnumSerivceStatus.begin(),
+                    spanEnumSerivceStatus.end(),
+                    [&](const ENUM_SERVICE_STATUSW& status)
+                    {
+                        return _wcsicmp(status.lpDisplayName, arg.data()) == 0;
+                    }
+                ))
+                {
+                    throw nullptr;
+                }
+
+                return true;
+            }
+            catch (Exception&)
+            {
+                // Another component is throwing an exception.
+                throw;
+            }
+            catch (...)
+            {
+                // We got some generic exception that we don't know how to handle,
+                // or we have a nullptr here due to the check failed.
+                // Fail it as a generic error for this category.
+                throw MonikaException(
+                    MA_STRING_EXCEPTION_UNKNOWN_SERVICE,
+                    HRESULT_FROM_WIN32(ERROR_INVALID_PARAMETER),
+                    arg
+                );
+            }
+
+            return AbstractStringParameter::Validate(arg);
+        }
+    } ServiceNameParameter;
+
+    return ServiceNameParameter;
+})();
+
+constinit const Parameter& ServiceNameParameter = ServiceNameParameterObj;
