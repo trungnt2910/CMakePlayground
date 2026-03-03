@@ -128,15 +128,32 @@
 
 typedef ULONG64 POOL_FLAGS;
 
+// Using a special value (e.g. -2) made clang complain,
+// so we invented this whole new class.
+//
+// Fortunately, everything is done in compile time,
+// so there should be no runtime bloat.
+class CompatPOOL_TYPE {
+    POOL_TYPE Value     = {};
+    BOOL      Supported = {};
+
+public:
+    constexpr CompatPOOL_TYPE(): Supported(FALSE) { }
+    constexpr CompatPOOL_TYPE(POOL_TYPE type): Value(type), Supported(TRUE) { }
+
+    constexpr BOOL IsSupported() const { return Supported; }
+    constexpr operator POOL_TYPE() const { return Value; }
+};
+
 consteval
-POOL_TYPE
+CompatPOOL_TYPE
 CompatPoolFlagsToPoolTypeImpl(
     POOL_FLAGS Flags
 )
 {
-    constexpr POOL_TYPE Unsupported = (POOL_TYPE)-2;
+    constexpr CompatPOOL_TYPE Unsupported;
 
-    POOL_TYPE Type = Unsupported;
+    CompatPOOL_TYPE Type = Unsupported;
 
     bool FlagUninitialized = false;
     bool FlagSession = false;
@@ -144,7 +161,6 @@ CompatPoolFlagsToPoolTypeImpl(
 
     if (Flags & POOL_FLAG_UNINITIALIZED)
     {
-        // No effect, but handled by the compat macro.
         FlagUninitialized = true;
         Flags ^= POOL_FLAG_UNINITIALIZED;
     }
@@ -164,7 +180,7 @@ CompatPoolFlagsToPoolTypeImpl(
     if (Flags & POOL_FLAG_NON_PAGED)
     {
         Flags ^= POOL_FLAG_NON_PAGED;
-        constexpr POOL_TYPE Map[2][2] =
+        constexpr CompatPOOL_TYPE Map[2][2] =
         {
             { NonPagedPoolNx, NonPagedPoolNxCacheAligned },
             { NonPagedPoolSessionNx, Unsupported }
@@ -174,7 +190,7 @@ CompatPoolFlagsToPoolTypeImpl(
     else if (Flags & POOL_FLAG_NON_PAGED_EXECUTE)
     {
         Flags ^= POOL_FLAG_NON_PAGED_EXECUTE;
-        constexpr POOL_TYPE Map[2][2] =
+        constexpr CompatPOOL_TYPE Map[2][2] =
         {
             { NonPagedPoolExecute, NonPagedPoolCacheAligned },
             { NonPagedPoolSession, NonPagedPoolCacheAlignedSession }
@@ -184,7 +200,7 @@ CompatPoolFlagsToPoolTypeImpl(
     else if (Flags & POOL_FLAG_PAGED)
     {
         Flags ^= POOL_FLAG_PAGED;
-        constexpr POOL_TYPE Map[2][2] =
+        constexpr CompatPOOL_TYPE Map[2][2] =
         {
             { PagedPool, PagedPoolCacheAligned },
             { PagedPoolSession, PagedPoolCacheAlignedSession }
@@ -197,15 +213,19 @@ CompatPoolFlagsToPoolTypeImpl(
         return Unsupported;
     }
 
+    // No effect in ExAllocatePoolWithTag.
+    // Instead, handled in compat macro below with a memset.
+    (void)FlagUninitialized;
+
     return Type;
 }
 
 #define ExAllocatePool2(Flags, NumberOfBytes, Tag)                                              \
     ([&]() [[msvc::forceinline]]                                                                \
     {                                                                                           \
-        constexpr POOL_TYPE Type = CompatPoolFlagsToPoolTypeImpl((Flags));                      \
-        static_assert((int)Type >= 0, "Unsupported Pool Flags.");                               \
-        PVOID pReturn = ExAllocatePoolWithTag(Type, (NumberOfBytes), (Tag));                    \
+        constexpr CompatPOOL_TYPE Type = CompatPoolFlagsToPoolTypeImpl((Flags));                \
+        static_assert(Type.IsSupported(), "Unsupported Pool Flags.");                           \
+        PVOID pReturn = ExAllocatePoolWithTag((POOL_TYPE)Type, (NumberOfBytes), (Tag));         \
         if constexpr (!((Flags) & POOL_FLAG_UNINITIALIZED))                                     \
         {                                                                                       \
             if (pReturn != NULL)                                                                \
@@ -225,4 +245,32 @@ CompatPoolFlagsToPoolTypeImpl(
 typedef struct _KADDRESS_RANGE_DESCRIPTOR
     KADDRESS_RANGE_DESCRIPTOR, *PKADDRESS_RANGE_DESCRIPTOR;
 
+#ifndef __MINGW32__
 typedef enum _SUBSYSTEM_INFORMATION_TYPE SUBSYSTEM_INFORMATION_TYPE;
+#endif
+
+#ifdef __MINGW32__
+
+#ifndef __in
+#define __in
+#endif
+
+typedef enum _SUBSYSTEM_INFORMATION_TYPE {
+  SubsystemInformationTypeWin32,
+  SubsystemInformationTypeWSL,
+  MaxSubsystemInformationType
+} SUBSYSTEM_INFORMATION_TYPE, *PSUBSYSTEM_INFORMATION_TYPE;
+
+typedef struct _KTRAP_FRAME KTRAP_FRAME, *PKTRAP_FRAME;
+
+#if defined(_M_IX86)
+// x86 uses KTRAP_FRAME as its KEXCEPTION_FRAME.
+typedef struct _KTRAP_FRAME KEXCEPTION_FRAME, *PKEXCEPTION_FRAME;
+#else
+typedef struct _KEXCEPTION_FRAME KEXCEPTION_FRAME, *PKEXCEPTION_FRAME;
+#endif // defined(_M_IX86)
+
+typedef struct _EXCEPTION_REGISTRATION_RECORD
+    EXCEPTION_REGISTRATION_RECORD, *PEXCEPTION_REGISTRATION_RECORD;
+
+#endif // __MINGW32__
