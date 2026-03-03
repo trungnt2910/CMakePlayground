@@ -11,9 +11,17 @@ add_link_options(-municode)
 add_compile_options(-gcodeview)
 add_link_options(-Wl,--pdb=)
 
+# Catch more errors during compilation.
 add_compile_options(-Werror)
 add_compile_options(-Wall)
 add_compile_options(-Wextra)
 
-add_subdirectory(monika)
+# Generate `MONIKA_` properties.
+include(${CMAKE_SOURCE_DIR}/cmake/BuildProps.cmake)
+
+# Support for building kernel-mode drivers
+include(${CMAKE_SOURCE_DIR}/cmake/KernelModeDriver.cmake)
+
+add_subdirectory(lxstub)
 add_subdirectory(lxmonika)
+add_subdirectory(monika)
