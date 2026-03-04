@@ -50,8 +50,9 @@ file(GLOB SDK_BIN_DIRS RELATIVE
 
 set(MONIKA_LATEST_SDK_VERSION "0.0.0.0")
 foreach(DIR IN LISTS SDK_BIN_DIRS)
-    # Find an SDK that also has WDK for kernel headers.
+    # Find an SDK that also has WDK for kernel headers and libraries for the target arch.
     if(IS_DIRECTORY "${MONIKA_WINDOWS_KITS_ROOT}/bin/${DIR}/${MONIKA_HOST_SDK_ARCH}" AND
+       IS_DIRECTORY "${MONIKA_WINDOWS_KITS_ROOT}/Lib/${DIR}/km/${MONIKA_SDK_ARCH}" AND
        IS_DIRECTORY "${MONIKA_WINDOWS_KITS_ROOT}/Include/${DIR}/km")
         if(DIR VERSION_GREATER MONIKA_LATEST_SDK_VERSION)
             set(MONIKA_LATEST_SDK_VERSION "${DIR}")
@@ -66,8 +67,29 @@ find_program(SIGNTOOL_EXECUTABLE
 )
 
 macro(add_driver name)
+    set(DRIVER_SRCS "")
+    set(DRIVER_DEFS "")
+
+    foreach(file ${ARGN})
+        if(file MATCHES "\\.def$")
+            if(IS_ABSOLUTE "${file}")
+                list(APPEND DRIVER_DEFS "${file}")
+            else()
+                list(APPEND DRIVER_DEFS "${CMAKE_CURRENT_SOURCE_DIR}/${file}")
+            endif()
+        else()
+            list(APPEND DRIVER_SRCS "${file}")
+        endif()
+    endforeach()
+
     # Build raw library.
-    add_library(${name} SHARED ${ARGN})
+    _add_library(${name} SHARED ${DRIVER_SRCS})
+
+    # Make sure the library has access to Monika props.
+    monika_target_build_props(${name})
+
+    # Register the PDB with CMake.
+    monika_target_pdb(${name})
 
     # Lock to RS1 to target as many Windows devices as possible.
     target_compile_definitions(${name} PRIVATE NTDDI_VERSION=NTDDI_WIN10_RS1)
@@ -95,18 +117,29 @@ macro(add_driver name)
         target_compile_options(${name} PRIVATE -mrtd)
     endif()
 
+    target_link_options(${name} PRIVATE --target=${CMAKE_SYSTEM_PROCESSOR}-pc-windows-msvc)
     target_link_options(${name} PRIVATE -nostdlib)
-    target_link_options(${name} PRIVATE -Wl,-subsystem=native)
-    target_link_options(${name} PRIVATE -Wl,-entry=DriverEntry)
-    target_link_options(${name} PRIVATE -Wl,-file-alignment=0x200)
-    target_link_options(${name} PRIVATE -Wl,-section-alignment=0x1000)
-    target_link_options(${name} PRIVATE -Wl,-image-base=0x140000000)
-    target_link_options(${name} PRIVATE -Wl,--stack=0x100000)
-    target_link_options(${name} PRIVATE -Wl,--exclude-all-symbols)
-    target_link_options(${name} PRIVATE -Wl,--gc-sections)
-    target_link_options(${name} PRIVATE -Wl,--dynamicbase)
-    target_link_options(${name} PRIVATE -Wl,--nxcompat)
+    target_link_options(${name} PRIVATE -fuse-ld=lld)
+    target_link_options(${name} PRIVATE -Wl,-exclude-all-symbols)
+    target_link_options(${name} PRIVATE -Wl,/debug:FULL)
+    target_link_options(${name} PRIVATE -Wl,/subsystem:native)
+    target_link_options(${name} PRIVATE -Wl,/entry:DriverEntry)
+    target_link_options(${name} PRIVATE -Wl,/filealign:0x200)
+    target_link_options(${name} PRIVATE -Wl,/align:0x1000)
+    target_link_options(${name} PRIVATE -Wl,/base:0x140000000)
+    target_link_options(${name} PRIVATE -Wl,/stack:0x100000)
+    target_link_options(${name} PRIVATE -Wl,/opt:ref)
+    target_link_options(${name} PRIVATE -Wl,/opt:icf)
+    target_link_options(${name} PRIVATE -Wl,/dynamicbase)
+    target_link_options(${name} PRIVATE -Wl,/nxcompat)
     target_link_options(${name} PRIVATE -Wl,/driver)
+    target_link_options(${name} PRIVATE -Wl,/implib:$<TARGET_IMPORT_FILE:${name}>)
+    target_link_options(${name} PRIVATE
+        -Wl,/pdb:$<TARGET_FILE_DIR:${name}>/$<TARGET_FILE_BASE_NAME:${name}>.pdb)
+
+    foreach(def_file ${DRIVER_DEFS})
+        target_link_options(${name} PRIVATE "-Wl,/def:${def_file}")
+    endforeach()
 
     target_include_directories(${name} SYSTEM PRIVATE
         ${MONIKA_WINDOWS_KITS_ROOT}/Include/${MONIKA_LATEST_SDK_VERSION}/km

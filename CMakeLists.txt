@@ -9,12 +9,14 @@ add_link_options(-municode)
 
 # Enable PDBs for use with VS Code Debugger.
 add_compile_options(-gcodeview)
-add_link_options(-Wl,--pdb=)
 
 # Catch more errors during compilation.
 add_compile_options(-Werror)
 add_compile_options(-Wall)
 add_compile_options(-Wextra)
+
+# Build system hacks.
+include(${CMAKE_SOURCE_DIR}/cmake/Hacks.cmake)
 
 # Generate `MONIKA_` properties.
 include(${CMAKE_SOURCE_DIR}/cmake/BuildProps.cmake)
