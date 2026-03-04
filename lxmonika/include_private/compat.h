@@ -135,13 +135,13 @@ typedef ULONG64 POOL_FLAGS;
 // so there should be no runtime bloat.
 class CompatPOOL_TYPE {
     POOL_TYPE Value     = {};
-    BOOL      Supported = {};
+    bool      Supported = {};
 
 public:
     constexpr CompatPOOL_TYPE(): Supported(FALSE) { }
     constexpr CompatPOOL_TYPE(POOL_TYPE type): Value(type), Supported(TRUE) { }
 
-    constexpr BOOL IsSupported() const { return Supported; }
+    constexpr bool IsSupported() const { return Supported; }
     constexpr operator POOL_TYPE() const { return Value; }
 };
 
@@ -245,32 +245,4 @@ CompatPoolFlagsToPoolTypeImpl(
 typedef struct _KADDRESS_RANGE_DESCRIPTOR
     KADDRESS_RANGE_DESCRIPTOR, *PKADDRESS_RANGE_DESCRIPTOR;
 
-#ifndef __MINGW32__
 typedef enum _SUBSYSTEM_INFORMATION_TYPE SUBSYSTEM_INFORMATION_TYPE;
-#endif
-
-#ifdef __MINGW32__
-
-#ifndef __in
-#define __in
-#endif
-
-typedef enum _SUBSYSTEM_INFORMATION_TYPE {
-  SubsystemInformationTypeWin32,
-  SubsystemInformationTypeWSL,
-  MaxSubsystemInformationType
-} SUBSYSTEM_INFORMATION_TYPE, *PSUBSYSTEM_INFORMATION_TYPE;
-
-typedef struct _KTRAP_FRAME KTRAP_FRAME, *PKTRAP_FRAME;
-
-#if defined(_M_IX86)
-// x86 uses KTRAP_FRAME as its KEXCEPTION_FRAME.
-typedef struct _KTRAP_FRAME KEXCEPTION_FRAME, *PKEXCEPTION_FRAME;
-#else
-typedef struct _KEXCEPTION_FRAME KEXCEPTION_FRAME, *PKEXCEPTION_FRAME;
-#endif // defined(_M_IX86)
-
-typedef struct _EXCEPTION_REGISTRATION_RECORD
-    EXCEPTION_REGISTRATION_RECORD, *PEXCEPTION_REGISTRATION_RECORD;
-
-#endif // __MINGW32__
