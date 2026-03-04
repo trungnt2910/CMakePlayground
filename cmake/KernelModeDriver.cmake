@@ -1,95 +1,25 @@
-# Detect WDK include paths from a llvm-mingw installation.
-set(MONIKA_KM_INCLUDE_DIRECTORIES ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES})
-list(TRANSFORM MONIKA_KM_INCLUDE_DIRECTORIES APPEND "/ddk")
-
-#
-# Import Stubs
-# Add import stubs for missing symbols from ReactOS's libntoskrnl.a.
-#
-
-function(add_import_stub TARGET_NAME SOURCE_NAME)
-    set(DLL_DECORATED FALSE)
-
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-        set(DLL_ARCH "i386:x86-64")
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "i686")
-        set(DLL_ARCH "i386")
-        set(DLL_DECORATED TRUE) # Only i386 (stdcall) uses @N decoration.
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "armv7")
-        set(DLL_ARCH "arm")
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
-        set(DLL_ARCH "arm64")
-    else()
-        message(FATAL_ERROR "Unsupported processor: ${CMAKE_SYSTEM_PROCESSOR}")
-    endif()
-
-    find_program(DLLTOOL_EXECUTABLE
-        NAMES "llvm-dlltool" "${CMAKE_C_COMPILER_TARGET}-dlltool" "dlltool"
-        HINTS "${CMAKE_C_BIN_DIR}"
-    )
-
-    set(DEF_FILE "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.def")
-    set(LIB_FILE "${CMAKE_CURRENT_BINARY_DIR}/lib${TARGET_NAME}.a")
-
-    set(DEF_CONTENT "LIBRARY ${SOURCE_NAME}\nEXPORTS\n")
-
-    foreach(SYM_RAW IN LISTS ARGN)
-        if(SYM_RAW MATCHES "([A-Za-z0-9_]+)\\(([0-9]+)\\)")
-            set(SYM_NAME ${CMAKE_MATCH_1})
-            set(PARAM_COUNT ${CMAKE_MATCH_2})
-
-            if(DLL_DECORATED)
-                math(EXPR STDCALL_BYTES "${PARAM_COUNT} * ${CMAKE_SIZEOF_VOID_P}")
-                string(APPEND DEF_CONTENT "    ${SYM_NAME}@${STDCALL_BYTES}\n")
-            else()
-                string(APPEND DEF_CONTENT "    ${SYM_NAME}\n")
-            endif()
-        else()
-            string(APPEND DEF_CONTENT "    ${SYM_RAW}\n")
-        endif()
-    endforeach()
-
-    file(WRITE "${DEF_FILE}" "${DEF_CONTENT}")
-
-    add_custom_target(${TARGET_NAME}_dlltool
-        COMMAND "${DLLTOOL_EXECUTABLE}" "-m" "${DLL_ARCH}" "-d" "${DEF_FILE}" "-l" "${LIB_FILE}"
-        BYPRODUCTS "${LIB_FILE}"
-        DEPENDS "${DEF_FILE}"
-        COMMENT "Generating import stub for ${SOURCE_NAME}..."
-        VERBATIM
-    )
-
-    add_library(${TARGET_NAME} INTERFACE)
-    target_link_libraries(${TARGET_NAME} INTERFACE "${LIB_FILE}")
-    add_dependencies(${TARGET_NAME} ${TARGET_NAME}_dlltool)
-endfunction()
-
-add_import_stub(
-    ntoscompat
-    ntoskrnl.exe
-
-    # List of symbols not exported by ReactOS ntoskrnl glue library here.
-    # "FuncName(ParamCount)"
-    "PsRegisterPicoProvider(2)"
-)
-
-#
-# Signing
-# Detect Windows 10 SDK and find signtool.
-#
-
 # This is always based on the %PROCESSOR_ARCHITECTURE% environment variable.
 if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "AMD64")
-    set(MONIKA_SDK_ARCH "x64")
+    set(MONIKA_HOST_SDK_ARCH "x64")
 elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86")
-    set(MONIKA_SDK_ARCH "x86")
+    set(MONIKA_HOST_SDK_ARCH "x86")
 elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "ARM64")
-    set(MONIKA_SDK_ARCH "ARM64")
+    set(MONIKA_HOST_SDK_ARCH "ARM64")
 elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "ARM")
-    set(MONIKA_SDK_ARCH "ARM")
+    set(MONIKA_HOST_SDK_ARCH "ARM")
 else()
     # Safe fallback.
+    set(MONIKA_HOST_SDK_ARCH "x86")
+endif()
+
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+    set(MONIKA_SDK_ARCH "x64")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "i686")
     set(MONIKA_SDK_ARCH "x86")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "armv7")
+    set(MONIKA_SDK_ARCH "ARM")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+    set(MONIKA_SDK_ARCH "ARM64")
 endif()
 
 set(REGS
@@ -120,7 +50,9 @@ file(GLOB SDK_BIN_DIRS RELATIVE
 
 set(MONIKA_LATEST_SDK_VERSION "0.0.0.0")
 foreach(DIR IN LISTS SDK_BIN_DIRS)
-    if(IS_DIRECTORY "${MONIKA_WINDOWS_KITS_ROOT}/bin/${DIR}/${MONIKA_SDK_ARCH}")
+    # Find an SDK that also has WDK for kernel headers.
+    if(IS_DIRECTORY "${MONIKA_WINDOWS_KITS_ROOT}/bin/${DIR}/${MONIKA_HOST_SDK_ARCH}" AND
+       IS_DIRECTORY "${MONIKA_WINDOWS_KITS_ROOT}/Include/${DIR}/km")
         if(DIR VERSION_GREATER MONIKA_LATEST_SDK_VERSION)
             set(MONIKA_LATEST_SDK_VERSION "${DIR}")
         endif()
@@ -129,7 +61,7 @@ endforeach()
 
 find_program(SIGNTOOL_EXECUTABLE
     NAMES signtool.exe
-    HINTS "${MONIKA_WINDOWS_KITS_ROOT}/bin/${MONIKA_LATEST_SDK_VERSION}/${MONIKA_SDK_ARCH}"
+    HINTS "${MONIKA_WINDOWS_KITS_ROOT}/bin/${MONIKA_LATEST_SDK_VERSION}/${MONIKA_HOST_SDK_ARCH}"
     REQUIRED
 )
 
@@ -137,9 +69,26 @@ macro(add_driver name)
     # Build raw library.
     add_library(${name} SHARED ${ARGN})
 
+    # Lock to RS1 to target as many Windows devices as possible.
+    target_compile_definitions(${name} PRIVATE NTDDI_VERSION=NTDDI_WIN10_RS1)
+
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+        target_compile_definitions(${name} PRIVATE _AMD64_)
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "i686")
+        target_compile_definitions(${name} PRIVATE _X86_)
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "armv7")
+        target_compile_definitions(${name} PRIVATE _ARM_)
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+        target_compile_definitions(${name} PRIVATE _ARM64_)
+    endif()
+
+    # Force MSVC mode.
+    target_compile_options(${name} PRIVATE --target=${CMAKE_SYSTEM_PROCESSOR}-pc-windows-msvc)
     target_compile_options(${name} PRIVATE -fms-extensions)
-    target_compile_options(${name} PRIVATE -fPIC)
+    target_compile_options(${name} PRIVATE -fms-compatibility)
+    target_compile_options(${name} PRIVATE -fms-compatibility-version=19.30)
     target_compile_options(${name} PRIVATE -nostdlib)
+    target_compile_options(${name} PRIVATE -nostdinc)
 
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "i686")
         # Force __stdcall to avoid symbol clashes.
@@ -159,17 +108,38 @@ macro(add_driver name)
     target_link_options(${name} PRIVATE -Wl,--nxcompat)
     target_link_options(${name} PRIVATE -Wl,/driver)
 
-    target_include_directories(${name} SYSTEM PRIVATE ${MONIKA_KM_INCLUDE_DIRECTORIES})
+    target_include_directories(${name} SYSTEM PRIVATE
+        ${MONIKA_WINDOWS_KITS_ROOT}/Include/${MONIKA_LATEST_SDK_VERSION}/km
+        ${MONIKA_WINDOWS_KITS_ROOT}/Include/${MONIKA_LATEST_SDK_VERSION}/km/crt
+        ${MONIKA_WINDOWS_KITS_ROOT}/Include/${MONIKA_LATEST_SDK_VERSION}/shared
+    )
+
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+        target_compile_definitions(${name} PRIVATE _AMD64_)
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "i686")
+        target_compile_definitions(${name} PRIVATE _X86_)
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "armv7")
+        target_compile_definitions(${name} PRIVATE _ARM_)
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+        target_compile_definitions(${name} PRIVATE _ARM64_)
+    endif()
+
+    target_link_directories(${name} PRIVATE
+        ${MONIKA_WINDOWS_KITS_ROOT}/Lib/${MONIKA_LATEST_SDK_VERSION}/km/${MONIKA_SDK_ARCH}
+    )
 
     target_link_libraries(${name} PRIVATE ntoskrnl)
-    target_link_libraries(${name} PRIVATE ntoscompat)
+
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "i686")
+        target_link_libraries(${name} PRIVATE bufferoverflowk)
+    endif()
 
     set_target_properties(
         ${name} PROPERTIES
 
         PREFIX ""
         OUTPUT_NAME "${name}"
-        SUFFIX ".sys" # A .sus file is an unsigned .sys file.
+        SUFFIX ".sys"
 
         IMPORT_PREFIX ""
         ARCHIVE_OUTPUT_NAME "${name}"

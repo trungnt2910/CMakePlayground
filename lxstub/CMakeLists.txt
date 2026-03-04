@@ -9,4 +9,5 @@ add_driver(
 
     ${LXSTUB_SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/lxstub.rc
+    ${CMAKE_CURRENT_SOURCE_DIR}/lxstub.def
 )
