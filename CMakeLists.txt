@@ -7,9 +7,6 @@ set(CMAKE_CXX_STANDARD 26)
 add_compile_options(-municode)
 add_link_options(-municode)
 
-# Enable PDBs for use with VS Code Debugger.
-add_compile_options(-gcodeview)
-
 # Catch more errors during compilation.
 add_compile_options(-Werror)
 add_compile_options(-Wall)
@@ -18,7 +15,16 @@ add_compile_options(-Wextra)
 # Build system hacks.
 include(${CMAKE_SOURCE_DIR}/cmake/Hacks.cmake)
 
-# Generate `MONIKA_` properties.
+# Get the host and target architectures.
+include(${CMAKE_SOURCE_DIR}/cmake/Architecture.cmake)
+
+# Support for sanitizers.
+include(${CMAKE_SOURCE_DIR}/cmake/Sanitizers.cmake)
+
+# Support for PDBs.
+include(${CMAKE_SOURCE_DIR}/cmake/PDB.cmake)
+
+# Generate `MONIKA_` properties and add default build options.
 include(${CMAKE_SOURCE_DIR}/cmake/BuildProps.cmake)
 
 # Support for building kernel-mode drivers

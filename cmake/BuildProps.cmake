@@ -4,6 +4,8 @@ add_custom_target(UpdateBuildProps
     COMMAND ${CMAKE_COMMAND}
         -DSOURCE_DIR="${CMAKE_SOURCE_DIR}"
         -DOUTPUT_FILE="${MONIKA_BUILD_PROPS_H}"
+        -DMONIKA_BUILD_AUTHOR="${MONIKA_BUILD_AUTHOR}"
+        -DMONIKA_BUILD_NAME="${MONIKA_BUILD_NAME}"
         -P "${CMAKE_SOURCE_DIR}/cmake/GetBuildProps.cmake"
     BYPRODUCTS "${MONIKA_BUILD_PROPS_H}"
     COMMENT "Checking Git status and updating metadata..."
@@ -23,29 +25,37 @@ macro(monika_target_build_props name)
     target_compile_definitions(${name} PRIVATE MONIKA_TIMESTAMP="${MONIKA_TIMESTAMP}")
 endmacro()
 
-macro(monika_target_pdb name)
-    set_property(TARGET ${name} APPEND PROPERTY
-        ADDITIONAL_CLEAN_FILES "$<TARGET_FILE_DIR:${name}>/$<TARGET_FILE_BASE_NAME:${name}>.pdb"
-    )
-endmacro()
-
-macro(monika_target_mingw_pdb name)
-    target_link_options(${name} PRIVATE
-        -Wl,--pdb=$<TARGET_FILE_DIR:${name}>/$<TARGET_FILE_BASE_NAME:${name}>.pdb)
-
-    monika_target_pdb(${name})
+macro(monika_target_debug_options name)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_compile_options(${name} PRIVATE -O0)
+        target_compile_definitions(${name} PRIVATE _DEBUG)
+    else()
+        target_compile_options(${name} PRIVATE -O2)
+        target_compile_definitions(${name} PRIVATE NDEBUG)
+    endif()
 endmacro()
 
 macro(add_executable name)
     _add_executable(${name} ${ARGN})
 
     monika_target_build_props(${name})
+    monika_target_debug_options(${name})
     monika_target_mingw_pdb(${name})
+    monika_target_add_sanitizers(${name})
+
+    install(FILES "$<TARGET_FILE:${name}>" DESTINATION bin/${MONIKA_INSTALL_ARCH})
+    monika_install_pdb(${name})
+    monika_install_sanitizers(${name})
 endmacro()
 
 macro(add_library name)
     _add_library(${name} ${ARGN})
 
     monika_target_build_props(${name})
+    monika_target_debug_options(${name})
     monika_target_mingw_pdb(${name})
+    monika_target_add_sanitizers(${name})
+
+    install(FILES "$<TARGET_FILE:${name}>" DESTINATION bin/${MONIKA_INSTALL_ARCH})
+    monika_install_pdb(${name})
 endmacro()

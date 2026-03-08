@@ -11,3 +11,9 @@ add_driver(
     ${CMAKE_CURRENT_SOURCE_DIR}/lxstub.rc
     ${CMAKE_CURRENT_SOURCE_DIR}/lxstub.def
 )
+
+set_target_properties(
+    lxstub PROPERTIES
+
+    OUTPUT_NAME "LXCORE"
+)

@@ -10,13 +10,13 @@
       "name": "Base",
       "hidden": true,
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/build/$env{CONFIGURATION}/$env{ARCHITECTURE}",
+      "binaryDir": "${sourceDir}/bin/$env{CONFIGURATION}/$env{ARCHITECTURE}",
       "environment": {
         "CC": "$env{TOOL_ARCH}-w64-mingw32-clang.exe",
         "CXX": "$env{TOOL_ARCH}-w64-mingw32-clang++.exe"
       },
       "cacheVariables": {
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/$env{CONFIGURATION}/$env{ARCHITECTURE}",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/$env{CONFIGURATION}",
         "CMAKE_BUILD_TYPE": "$env{CONFIGURATION}",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "CMAKE_SYSTEM_NAME": "Windows",

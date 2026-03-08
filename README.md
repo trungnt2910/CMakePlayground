@@ -21,18 +21,21 @@ builds and older C++ versions.
 
 - OS: Windows 10
 - Compiler: Latest build of [**@mstorsjo**'s `llvm-mingw`](https://github.com/mstorsjo/llvm-mingw)
-   - The `bin` folde should be in the system `PATH`.
+   - The `bin` folder should be in the system `PATH`.
 - Generator: `Ninja`.
 - IDE: Visual Studio Code
 - Linter: `clangd`
     - Intellisense has bugs when dealing with `wchar_t` and `std::wstring`.
+- WDK & Win10 SDK RS1 & RS4.
 
 ## Supported Projects
 
 - [ ] Core LxMonika Tools
   - [x] `monika.exe` CLI
-  - [ ] `lxstub` Stub Driver
-  - [ ] `lxmonika` Driver
+  - [x] `lxstub` Stub Driver
+  - [x] `lxmonika` Driver
+  - [ ] 32-bit ARM support
+        (blocked by [LLVM SEH support](https://github.com/llvm/llvm-project/pull/184953))
 - [ ] `mxss` Monix Example
   - [ ] `mxhost` Monix Host CLI
   - [ ] `mxss` Monix Kernel Driver
@@ -40,10 +43,6 @@ builds and older C++ versions.
 
 ## TODO
 
-- Figure out how to use `MinGW`/`clang`/`CMake` with Windows Kernel Mode drivers.
-- Write scripts
-    - Pack build artifacts
-    - Setup compiler toolchain
 - CI builds
 
 ## Community
