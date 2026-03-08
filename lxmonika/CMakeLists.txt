@@ -18,16 +18,8 @@ target_compile_definitions(lxmonika PRIVATE MONIKA_IN_DRIVER=1)
 target_compile_options(lxmonika PRIVATE -Wno-missing-field-initializers)
 
 # [[msvc::forceinline]]
+# Blocked by https://github.com/llvm/llvm-project/pull/185282
 target_compile_options(lxmonika PRIVATE -Wno-unknown-attributes)
-
-# NTSTATUS to PVOID in Logging
-target_compile_options(lxmonika PRIVATE -Wno-int-to-void-pointer-cast)
-
-# Deprecated ExAllocatePoolWithTag
-target_compile_options(lxmonika PRIVATE -Wno-deprecated-declarations)
-
-# Casting between older and later Monika callbacks
-target_compile_options(lxmonika PRIVATE -Wno-cast-function-type-mismatch)
 
 # RTL_CONSTANT_STRING
 # UNICODE_STRING expects the number of **bytes** in its members,
