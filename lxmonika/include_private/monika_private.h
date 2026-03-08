@@ -222,36 +222,36 @@ extern SIZE_T MapLxssProviderIndex;
 // Monika helper macros
 //
 
-#define MA_RETURN_IF_FAIL(s)                                                    \
-    do                                                                          \
-    {                                                                           \
-        NTSTATUS status__ = (s);                                                \
-        if (!NT_SUCCESS(status__))                                              \
-        {                                                                       \
-            Logger::LogTrace("Function failed with status ", (void*)status__);  \
-            return status__;                                                    \
-        }                                                                       \
-    }                                                                           \
+#define MA_RETURN_IF_FAIL(s)                                                            \
+    do                                                                                  \
+    {                                                                                   \
+        NTSTATUS status__ = (s);                                                        \
+        if (!NT_SUCCESS(status__))                                                      \
+        {                                                                               \
+            Logger::LogTrace("Function failed with status ", (void*)(INT_PTR)status__); \
+            return status__;                                                            \
+        }                                                                               \
+    }                                                                                   \
     while (FALSE)
 
-#define MA_ALLOCATE_AUTO_OR_RETURN(Type, Name, Flags, NumberOfBytes, Tag)       \
-    Type Name;                                                                  \
-    Name = (Type)ExAllocatePool2((Flags), (NumberOfBytes), (Tag));              \
-    if (Name == NULL)                                                           \
-    {                                                                           \
-        return STATUS_NO_MEMORY;                                                \
-    }                                                                           \
+#define MA_ALLOCATE_AUTO_OR_RETURN(Type, Name, Flags, NumberOfBytes, Tag)               \
+    Type Name;                                                                          \
+    Name = (Type)ExAllocatePool2((Flags), (NumberOfBytes), (Tag));                      \
+    if (Name == NULL)                                                                   \
+    {                                                                                   \
+        return STATUS_NO_MEMORY;                                                        \
+    }                                                                                   \
     AUTO_RESOURCE(Name, [](auto p__){ ExFreePoolWithTag(p__, (Tag)); })
 
 // The built-in ASSERT causes compile errors in earlier WDK versions.
-#define MA_ASSERT(exp)                                                          \
-    do                                                                          \
-    {                                                                           \
-        if (!(exp))                                                             \
-        {                                                                       \
-            RtlAssert((PVOID)#exp, (PVOID)__FILE__, __LINE__, NULL);            \
-        }                                                                       \
-    }                                                                           \
+#define MA_ASSERT(exp)                                                                  \
+    do                                                                                  \
+    {                                                                                   \
+        if (!(exp))                                                                     \
+        {                                                                               \
+            RtlAssert((PVOID)#exp, (PVOID)__FILE__, __LINE__, NULL);                    \
+        }                                                                               \
+    }                                                                                   \
     while (FALSE)
 
 //
