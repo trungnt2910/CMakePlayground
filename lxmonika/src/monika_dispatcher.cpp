@@ -310,7 +310,7 @@ MapCreateProcess(
             Logger::LogTrace("Call failed, retrying with TH1 variant.");
 
             // Retry with the TH1 variant.
-            status = ((PS_PICO_CREATE_PROCESS_TH1*)MapOriginalRoutines.CreateProcess)(
+            status = ((PS_PICO_CREATE_PROCESS_TH1*)(PVOID)MapOriginalRoutines.CreateProcess)(
                 ProcessAttributes, &hdlProcess);
 
             if (!NT_SUCCESS(status))
@@ -327,7 +327,7 @@ MapCreateProcess(
     }
     else // TH1
     {
-        status = ((PS_PICO_CREATE_PROCESS_TH1*)MapOriginalRoutines.CreateProcess)(
+        status = ((PS_PICO_CREATE_PROCESS_TH1*)(PVOID)MapOriginalRoutines.CreateProcess)(
             ProcessAttributes, &hdlProcess);
     }
 
@@ -474,7 +474,7 @@ MapCreateThread(
     }
     else // TH1
     {
-        status = ((PS_PICO_CREATE_THREAD_TH1*)MapOriginalRoutines.CreateThread)(
+        status = ((PS_PICO_CREATE_THREAD_TH1*)(PVOID)MapOriginalRoutines.CreateThread)(
             ThreadAttributes, &hdlThread);
     }
 

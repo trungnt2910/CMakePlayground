@@ -228,9 +228,9 @@ MapInitialize()
                                                                                 \
     MapRoutinesTh1[MaPicoProvider##index] = MapRoutines[MaPicoProvider##index]; \
     MapRoutinesTh1[MaPicoProvider##index].CreateProcess =                       \
-        (PPS_PICO_CREATE_PROCESS)MaPicoCreateProcessTh1##index;                 \
+        (PPS_PICO_CREATE_PROCESS)(PVOID)MaPicoCreateProcessTh1##index;          \
     MapRoutinesTh1[MaPicoProvider##index].CreateThread =                        \
-        (PPS_PICO_CREATE_THREAD)MaPicoCreateThreadTh1##index;
+        (PPS_PICO_CREATE_THREAD)(PVOID)MaPicoCreateThreadTh1##index;
 #include "monika_providers.cpp"
 #undef MONIKA_PROVIDER
 
