@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <filesystem>
 #include <iostream>
 #include <memory>
@@ -47,7 +48,7 @@ WSTRING Win32HandleToPath(HANDLE hdlFile, DWORD dwFlags)
             hdlFile, str.data(), (DWORD)str.size(), dwFlags);
         if (dwRequiredSize > str.size())
         {
-            str.resize(max(str.size(), dwRequiredSize) * 2);
+            str.resize(std::max(str.size(), dwRequiredSize) * 2);
             continue;
         }
 
@@ -58,15 +59,12 @@ WSTRING Win32HandleToPath(HANDLE hdlFile, DWORD dwFlags)
     }
 }
 
-BOOL IntializeRootDirectory(PCSTR pUserParameter, WSTRING* pDosDirectory)
+BOOL IntializeRootDirectory(PCWSTR pUserParameter, WSTRING* pDosDirectory)
 {
     WSTRING strDosPath;
     if (pUserParameter != NULL)
     {
-        for (; *pUserParameter != '\0'; ++pUserParameter)
-        {
-            strDosPath.push_back(*pUserParameter);
-        }
+        strDosPath = pUserParameter;
     }
     else
     {
@@ -109,7 +107,7 @@ public:
     }
 };
 
-int main(int argc, const char** argv)
+int wmain(int argc, const wchar_t** argv)
 {
     auto _ConsoleCP = ConsoleCPSetter(CP_WINUNICODE);
 
@@ -157,7 +155,7 @@ int main(int argc, const char** argv)
 
     MX_INFO(L"initializing system root");
 
-    PCSTR pRootPath = NULL;
+    PCWSTR pRootPath = NULL;
     if (argc >= 2)
     {
         pRootPath = argv[1];
