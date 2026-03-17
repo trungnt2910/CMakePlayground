@@ -36,10 +36,10 @@ builds and older C++ versions.
   - [x] `lxmonika` Driver
   - [ ] 32-bit ARM support
         (blocked by [LLVM SEH support](https://github.com/llvm/llvm-project/pull/184953))
-- [ ] `mxss` Monix Example
-  - [ ] `mxhost` Monix Host CLI
-  - [ ] `mxss` Monix Kernel Driver
-  - [ ] `monix` Monix Userland Subproject
+- [x] `mxss` Monix Example
+  - [x] `mxhost` Monix Host CLI
+  - [x] `mxss` Monix Kernel Driver
+  - [x] `monix` Monix Userland Subproject
 
 ## TODO
 
