@@ -1,15 +1,17 @@
 project(lxmonika)
 
+monika_feature(Core)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include_private)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-file(GLOB_RECURSE LXSTUB_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE LXMONIKA_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 add_driver(
     lxmonika
 
-    ${LXSTUB_SOURCES}
+    ${LXMONIKA_SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/lxmonika.rc
 )
 
@@ -31,4 +33,7 @@ target_link_libraries(lxmonika PRIVATE wdmsec)
 
 target_link_libraries(lxmonika PRIVATE lxstub)
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" DESTINATION "Include/lxmonika")
+monika_should_install_target(lxmonika SHOULD_INSTALL_LXMONIKA)
+if(SHOULD_INSTALL_LXMONIKA)
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" DESTINATION "Include/lxmonika")
+endif()

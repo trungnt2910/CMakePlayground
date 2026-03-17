@@ -18,6 +18,9 @@ include(${CMAKE_SOURCE_DIR}/cmake/Hacks.cmake)
 # Get the host and target architectures.
 include(${CMAKE_SOURCE_DIR}/cmake/Architecture.cmake)
 
+# Support for features.
+include(${CMAKE_SOURCE_DIR}/cmake/Feature.cmake)
+
 # Support for sanitizers.
 include(${CMAKE_SOURCE_DIR}/cmake/Sanitizers.cmake)
 
@@ -33,3 +36,4 @@ include(${CMAKE_SOURCE_DIR}/cmake/KernelModeDriver.cmake)
 add_subdirectory(lxstub)
 add_subdirectory(lxmonika)
 add_subdirectory(monika)
+add_subdirectory(mxss)
