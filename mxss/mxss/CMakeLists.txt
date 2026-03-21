@@ -15,7 +15,7 @@ add_driver(
 # Override NTDDI_VERSION
 # Unlike lxmonika, which tries to be 100% compatible to support fossils like x86 WSL or Astoria,
 # mxss is meant to target modern systems.
-target_compile_options(mxss PRIVATE -UNTDDI_VERSION -DNTDDI_VERSION=NTDDI_WIN10_RS2)
+target_compile_options(mxss PRIVATE -UNTDDI_VERSION -DNTDDI_VERSION=NTDDI_WIN10_RS4)
 
 target_compile_options(mxss PRIVATE -Wno-missing-field-initializers)
 target_compile_options(mxss PRIVATE -Wno-unused-local-typedef)
