@@ -27,7 +27,7 @@ foreach(SRC_FILE IN LISTS MONIX_ROOTFS_SOURCE_FILES)
         VERBATIM
     )
 
-    add_custom_target(${SRC_NAME} DEPENDS ${BIN_FILE})
+    add_custom_target(${SRC_NAME} ALL DEPENDS ${BIN_FILE})
 
     monika_should_install_target(${SRC_NAME} SHOULD_INSTALL)
     if(SHOULD_INSTALL)
