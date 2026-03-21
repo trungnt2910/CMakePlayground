@@ -7,21 +7,27 @@ file(GLOB MONIX_ROOTFS_SOURCE_FILES "src/*")
 foreach(SRC_FILE IN LISTS MONIX_ROOTFS_SOURCE_FILES)
     get_filename_component(SRC_NAME "${SRC_FILE}" NAME_WE)
 
-    set(BIN_FILE ${CMAKE_CURRENT_BINARY_DIR}/${SRC_NAME})
+    set(BIN_FILE ${CMAKE_CURRENT_BINARY_DIR}/monix-${CMAKE_SYSTEM_PROCESSOR}/${SRC_NAME})
 
-    add_custom_target(${SRC_NAME}
-        COMMAND ${CMAKE_CXX_COMPILER}
-                ${SRC_FILE}
-                -o ${BIN_FILE}
-                --target=${CMAKE_SYSTEM_PROCESSOR}-linux-gnu
-                -std=c++26 -O2
-                -Werror -Wall -Wextra -Wpedantic
-                -nostdlib -static -s
-                -ffreestanding -fuse-ld=lld
+    add_custom_command(
         OUTPUT  ${BIN_FILE}
+        COMMAND ${CMAKE_CXX_COMPILER}
+                    ${SRC_FILE}
+                    -o ${BIN_FILE}
+                    --target=${CMAKE_SYSTEM_PROCESSOR}-linux-gnu
+                    -std=c++26 -O2
+                    -Werror -Wall -Wextra -Wpedantic
+                    -nostdlib -static -s
+                    -ffreestanding -fuse-ld=lld
+                    # Hack to allow MXSS to load this binary correctly.
+                    # MXSS has a bug where it does not allow unaligned offsets.
+                    -Wl,--no-rosegment
+        DEPENDS ${SRC_FILE}
         COMMENT "Building Monix CXX executable ${SRC_NAME}"
         VERBATIM
     )
+
+    add_custom_target(${SRC_NAME} DEPENDS ${BIN_FILE})
 
     monika_should_install_target(${SRC_NAME} SHOULD_INSTALL)
     if(SHOULD_INSTALL)
