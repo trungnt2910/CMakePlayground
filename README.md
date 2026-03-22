@@ -39,9 +39,7 @@ builds and older C++ versions.
 - [x] `mxss` Monix Example
   - [x] `mxhost` Monix Host CLI
   - [x] `mxss` Monix Kernel Driver
-  - [ ] `monix` Monix Userland Subproject
-        (Already buildable, but broken because of
-        [llvm/llvm-project#187851](https://github.com/llvm/llvm-project/issues/187851))
+  - [x] `monix` Monix Userland Subproject
 
 ## TODO
 
