@@ -13,44 +13,14 @@ MonixSyscall(
 
     static_assert(argsCount <= 6, "Too many arguments for a Linux syscall.");
 
-    static constexpr auto StringEqual = [](const char* a, const char *b)
-    {
-        while (*a != '\0' && *b != '\0')
-        {
-            if (*a != *b)
-            {
-                return false;
-            }
-            ++a;
-            ++b;
-        }
-        return true;
-    };
-
-#define SET_REGISTER_IF_PRESENT(index)                                                  \
-    do                                                                                  \
-    {                                                                                   \
-        if constexpr (argsCount > index)                                                \
-        {                                                                               \
-            reg_r##index = (intptr_t)args...[index];                                    \
-            SET_REGISTER_IF_EQUIVALENT_TO_RRET(name[index], (intptr_t)args...[index]);  \
-        }                                                                               \
-    }                                                                                   \
-    while (0)
-
-#define SET_REGISTER_IF_EQUIVALENT_TO_RRET(name_reg, value) \
-    do                                                      \
-    {                                                       \
-        /* reg_rret may overlap with another register. */   \
-                                                            \
-        /* While GCC treats this as an alias, clang will */ \
-        /* treat the register as undefined and refuse to */ \
-        /* copy in the desired value unless we do this. */  \
-        if constexpr (StringEqual((name_reg), name_rret))   \
-        {                                                   \
-            reg_rret = (value);                             \
-        }                                                   \
-    }                                                       \
+#define SET_REGISTER_IF_PRESENT(index)              \
+    do                                              \
+    {                                               \
+        if constexpr (argsCount > index)            \
+        {                                           \
+            reg_r##index = (intptr_t)args...[index];\
+        }                                           \
+    }                                               \
     while (0)
 
 #define DO_SYSCALL(op, rnum, rret, r0, r1, r2, r3, r4, r5, ...)             \
@@ -67,13 +37,9 @@ MonixSyscall(
         register intptr_t reg_r5   asm(#r5);                                \
         register intptr_t reg_rret asm(#rret);                              \
                                                                             \
-        constexpr const char* name[] = { #r0, #r1, #r2, #r3, #r4, #r5 };    \
-        constexpr const char* name_rret = { #rret };                        \
-                                                                            \
         /* The macros below expand to `if constexpr` statements. */         \
         /* The registers will only be attached to existing arguments. */    \
         reg_rnum = number;                                                  \
-        SET_REGISTER_IF_EQUIVALENT_TO_RRET(#rnum, number);                  \
         SET_REGISTER_IF_PRESENT(0);                                         \
         SET_REGISTER_IF_PRESENT(1);                                         \
         SET_REGISTER_IF_PRESENT(2);                                         \
@@ -132,7 +98,6 @@ MonixSyscall(
 #endif
 
 #undef SET_REGISTER_IF_PRESENT
-#undef SET_REGISTER_IF_EQUIVALENT_TO_RRET
 #undef DO_SYSCALL
 
 }
