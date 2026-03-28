@@ -3,10 +3,6 @@ project(lxmonika)
 
 set(CMAKE_CXX_STANDARD 26)
 
-# Match Visual Studio with everything Unicode by default.
-add_compile_options(-municode)
-add_link_options(-municode)
-
 # Catch more errors during compilation.
 add_compile_options(-Werror)
 add_compile_options(-Wall)

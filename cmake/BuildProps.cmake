@@ -35,6 +35,11 @@ macro(monika_target_debug_options name)
     endif()
 endmacro()
 
+macro(monika_target_unicode name)
+    target_compile_options(${name} PRIVATE -municode)
+    target_link_options(${name} PRIVATE -municode)
+endmacro()
+
 function(add_executable name)
     _add_executable(${name} ${ARGN})
 
@@ -42,6 +47,7 @@ function(add_executable name)
     monika_target_debug_options(${name})
     monika_target_mingw_pdb(${name})
     monika_target_add_sanitizers(${name})
+    monika_target_unicode(${name})
 
     monika_should_install_target(${name} SHOULD_INSTALL)
     if(SHOULD_INSTALL)
@@ -58,6 +64,7 @@ function(add_library name)
     monika_target_debug_options(${name})
     monika_target_mingw_pdb(${name})
     monika_target_add_sanitizers(${name})
+    monika_target_unicode(${name})
 
     monika_should_install_target(${name} SHOULD_INSTALL)
     if(SHOULD_INSTALL)
