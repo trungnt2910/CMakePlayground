@@ -1,8 +1,4 @@
-#if defined(__clang__)
-#include <winresrc.h>
-#else
 #include <verrsrc.h>
-#endif
 
 #define STR(x)   #x         // helper defines
 #define XSTR(x)  STR(x)     // helper defines
