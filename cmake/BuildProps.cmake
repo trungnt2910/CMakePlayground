@@ -41,7 +41,9 @@ macro(monika_target_unicode name)
 endmacro()
 
 function(add_executable name)
-    _add_executable(${name} ${ARGN})
+    monika_ensure_utf8_resources(SRCS ${ARGN})
+
+    _add_executable(${name} ${SRCS})
 
     monika_target_build_props(${name})
     monika_target_debug_options(${name})
@@ -58,7 +60,9 @@ function(add_executable name)
 endfunction()
 
 function(add_library name)
-    _add_library(${name} ${ARGN})
+    monika_ensure_utf8_resources(SRCS ${ARGN})
+
+    _add_library(${name} ${SRCS})
 
     monika_target_build_props(${name})
     monika_target_debug_options(${name})

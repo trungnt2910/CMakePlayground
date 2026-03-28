@@ -23,6 +23,9 @@ include(${CMAKE_SOURCE_DIR}/cmake/Sanitizers.cmake)
 # Support for PDBs.
 include(${CMAKE_SOURCE_DIR}/cmake/PDB.cmake)
 
+# Support for UTF-16 resources.
+include(${CMAKE_SOURCE_DIR}/cmake/Resources.cmake)
+
 # Generate `MONIKA_` properties and add default build options.
 include(${CMAKE_SOURCE_DIR}/cmake/BuildProps.cmake)
 

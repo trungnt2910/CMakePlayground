@@ -69,6 +69,8 @@ function(add_driver name)
         endif()
     endforeach()
 
+    monika_ensure_utf8_resources(DRIVER_SRCS ${DRIVER_SRCS})
+
     # Build raw library.
     _add_library(${name} SHARED ${DRIVER_SRCS})
 
@@ -182,7 +184,7 @@ function(add_driver name)
         COMMAND "${SIGNTOOL_EXECUTABLE}" sign /v /fd sha256 /n WDKTestCert "$<TARGET_FILE:${name}>"
         COMMAND "${CERTMGR_EXECUTABLE}" /put /c "$<TARGET_FILE:${name}>" "${CER_NAME}"
 
-        COMMENT "Signing driver ${name}.sys with WDKTestCert"
+        COMMENT "Signing driver $<TARGET_FILE_BASE_NAME:${name}>.sys with WDKTestCert"
     )
 
     set_property(TARGET ${name} APPEND PROPERTY
