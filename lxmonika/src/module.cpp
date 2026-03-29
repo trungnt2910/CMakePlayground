@@ -223,7 +223,7 @@ NTSTATUS
 MdlpGetResourceDirectory(
     _In_ HANDLE hModule,
     _In_ SIZE_T uModuleSize,
-    _In_ LPWSTR pIntResource,
+    _In_ LPSTR pIntResource,
     _In_ WORD wId,
     _Out_ PVOID* pPRsrcSectionStart,
     _Out_ PIMAGE_RESOURCE_DIRECTORY* pPResourceDirectory

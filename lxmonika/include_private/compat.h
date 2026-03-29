@@ -128,11 +128,9 @@
 
 typedef ULONG64 POOL_FLAGS;
 
-// Using a special value (e.g. -2) made clang complain,
-// so we invented this whole new class.
+// Using a special value (e.g. -2) made clang complain, so we invented this whole new class.
 //
-// Fortunately, everything is done in compile time,
-// so there should be no runtime bloat.
+// Fortunately, everything is constexpr, so there should be no runtime bloat.
 class CompatPOOL_TYPE {
     POOL_TYPE Value     = {};
     bool      Supported = {};
@@ -215,7 +213,7 @@ CompatPoolFlagsToPoolTypeImpl(
 
     // No effect in ExAllocatePoolWithTag.
     // Instead, handled in compat macro below with a memset.
-    (void)FlagUninitialized;
+    UNREFERENCED_PARAMETER(FlagUninitialized);
 
     return Type;
 }

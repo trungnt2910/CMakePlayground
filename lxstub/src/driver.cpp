@@ -4,7 +4,6 @@
 
 #include "lxss.h"
 #include "pico.h"
-#include "wdm.h"
 
 extern "C"
 NTSTATUS
