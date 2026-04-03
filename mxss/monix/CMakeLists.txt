@@ -2,6 +2,12 @@ project(monix)
 
 monika_feature(MXSS)
 
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7")
+    set(MONIX_ELF_TARGET "armv7-eabi")
+else()
+    set(MONIX_ELF_TARGET "${CMAKE_SYSTEM_PROCESSOR}-elf")
+endif()
+
 file(GLOB MONIX_ROOTFS_SOURCE_FILES "src/*")
 
 foreach(SRC_FILE IN LISTS MONIX_ROOTFS_SOURCE_FILES)
@@ -14,7 +20,7 @@ foreach(SRC_FILE IN LISTS MONIX_ROOTFS_SOURCE_FILES)
         COMMAND ${CMAKE_CXX_COMPILER}
                     ${SRC_FILE}
                     -o ${BIN_FILE}
-                    --target=${CMAKE_SYSTEM_PROCESSOR}-linux-gnu
+                    --target=${MONIX_ELF_TARGET}
                     -std=c++26 -O2
                     -Werror -Wall -Wextra -Wpedantic
                     -nostdlib -static -s
