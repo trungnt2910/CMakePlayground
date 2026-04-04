@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>MONIKA_NUGET_PACKAGE_ID</id>
+    <version>MONIKA_BUILD_VERSION</version>
+    <title>LxMonika Framework and SDK</title>
+    <authors>trungnt2910</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Framework for building and managing Windows Pico process providers.</description>
+    <tags>Windows Pico LxMonika Monika WSL SDK native</tags>
+    <copyright>Copyright (c) MONIKA_BUILD_COPYRIGHT_YEARS MONIKA_BUILD_AUTHOR</copyright>
+    <license type="expression">MIT</license>
+    <projectUrl>https://go.trungnt2910.com/lxmonika</projectUrl>
+    <repository type="git" url=MONIKA_QUOTED_BUILD_ORIGIN commit=MONIKA_QUOTED_BUILD_HASH_FULL />
+    <packageTypes>
+      <packageType name="DotnetTool" />
+    </packageTypes>
+  </metadata>
+  <files>
+    <file src="..\..\LICENSE.md" />
+
+    <!-- TODO: Write a dedicated package README.md in the packaging/nuget folder. -->
+    <!-- lxmonika/README.md is specific to lxmonika, and root README.md is obviously unusable. -->
+    <file src="..\..\lxmonika\README.md" />
+
+    <!-- Visual Studio C++ build support. -->
+    <file src="..\..\packaging\nuget\monika.targets" target=MONIKA_NUGET_TARGETS_PATH />
+
+    <!-- dotnet tool support. -->
+    <file src=".\tools\**" target="tools/" />
+
+    <!-- Move all SDK files to c\ to avoid conflicts. -->
+    <!-- This matches what the Windows C++ SDK NuGet package is doing. -->
+    <file src=".\bin\**" target="c/bin/" />
+    <file src=".\Debug\**" target="c/Debug/" />
+    <file src=".\Include\**" target="c/Include/" />
+    <file src=".\Lib\**" target="c/Lib/" />
+
+  </files>
+</package>
