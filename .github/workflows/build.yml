@@ -1,0 +1,133 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - "master"
+      - "staging"
+      - "dev/**"
+  pull_request:
+    branches:
+      - "master"
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform: [x86, x64, ARM64]
+        configuration: [Debug, Release]
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          # Fetch everything for build metadata to work
+          fetch-depth: 0
+
+      - name: Uninstall Windows SDK/WDK
+        run: |
+          # Windows SDK/WDK 26100 are problematic. They do not coexist peacefully with older kits.
+          # For now, we nuke every existing kit on the cloud and replace them with our own script.
+          # Once we migrate to clang for 32-bit and VS2026 for 64-bit, we can remove this step.
+          $KitPatterns = @(
+            "Windows Software Development Kit - Windows 10.0.*",
+            "Windows Driver Kit - Windows 10.0.*"
+          )
+
+          $Kits = `
+            Get-ChildItem -Path `
+              "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", `
+              "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall" |
+            Get-ItemProperty |
+            Where-Object {
+                $name = $_.DisplayName
+                $match = $false
+                foreach ($p in $KitPatterns) { if ($name -like $p) { $match = $true } }
+                $match
+            }
+
+          foreach ($kit in $Kits) {
+            Write-Host "Uninstalling: $($kit.DisplayName)" -ForegroundColor Cyan
+            Start-Process cmd.exe -ArgumentList "/c $($kit.QuietUninstallString)" -Wait -NoNewWindow
+          }
+        shell: powershell
+
+      - name: Install Windows SDK/WDK
+        run: powershell.exe -File ${{ github.workspace }}\setup.ps1
+        shell: cmd
+
+      - name: Install Code Signing Certificate
+        run: |
+          $pfxBytes = [System.Convert]::FromBase64String("${{ secrets.MONIKA_CERT_PFX }}".Trim())
+          $pfxPath = "${{ github.workspace }}\lxmonika.pfx"
+          [System.IO.File]::WriteAllBytes($pfxPath, $pfxBytes)
+
+          Import-PfxCertificate -FilePath $pfxPath -CertStoreLocation Cert:\CurrentUser\My
+
+          Remove-Item $pfxPath
+        shell: powershell
+
+      - name: Build
+        run: |
+          cmake --preset ${{ matrix.configuration }}-${{ matrix.platform }} ^
+            -DMONIKA_CERT_NAME="Project Reality"
+          cmake --build bin/${{ matrix.configuration }}/${{ matrix.platform }} --target install
+        shell: cmd
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: monika_${{ matrix.configuration }}_${{ matrix.platform }}
+          path: out/${{ matrix.configuration }}
+
+  pack:
+    needs: build
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: monika_${{ matrix.configuration }}_*
+          path: out/${{ matrix.configuration }}
+          merge-multiple: true
+
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v3
+
+      - name: NuGet Pack
+        run: |
+          nuget pack out/${{ matrix.configuration }}/monika.nuspec -NonInteractive
+        shell: cmd
+
+      - name: Upload NuGet Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: monika_nupkg_${{ matrix.configuration }}
+          path: ./*.nupkg
+
+      - name: Publish NuGet Packages to GitHub
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: |
+          nuget sources add                             ^
+            -NonInteractive                             ^
+            -Name "github"                              ^
+            -UserName "${{ github.repository_owner }}"  ^
+            -Password "${{ secrets.GITHUB_TOKEN }}"     ^
+            -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+
+          nuget push *.nupkg                      ^
+            -NonInteractive                       ^
+            -ApiKey "${{ secrets.GITHUB_TOKEN }}" ^
+            -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
