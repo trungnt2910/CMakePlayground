@@ -53,6 +53,8 @@ find_program(CERTMGR_EXECUTABLE
     REQUIRED
 )
 
+set(MONIKA_CERT_NAME "WDKTestCert" CACHE STRING "The name of the certificate for signing drivers" )
+
 function(add_driver name)
     set(DRIVER_SRCS "")
     set(DRIVER_DEFS "")
@@ -181,10 +183,11 @@ function(add_driver name)
     set(CER_NAME "$<TARGET_FILE_DIR:${name}>/$<TARGET_FILE_BASE_NAME:${name}>.cer")
 
     add_custom_command(TARGET ${name} POST_BUILD
-        COMMAND "${SIGNTOOL_EXECUTABLE}" sign /v /fd sha256 /n WDKTestCert "$<TARGET_FILE:${name}>"
+        COMMAND "${SIGNTOOL_EXECUTABLE}"
+            sign /v /fd sha256 /n "${MONIKA_CERT_NAME}" "$<TARGET_FILE:${name}>"
         COMMAND "${CERTMGR_EXECUTABLE}" /put /c "$<TARGET_FILE:${name}>" "${CER_NAME}"
 
-        COMMENT "Signing driver $<TARGET_FILE_BASE_NAME:${name}>.sys with WDKTestCert"
+        COMMENT "Signing driver $<TARGET_FILE_BASE_NAME:${name}>.sys"
     )
 
     set_property(TARGET ${name} APPEND PROPERTY
