@@ -131,3 +131,4 @@ jobs:
             -NonInteractive                       ^
             -ApiKey "${{ secrets.GITHUB_TOKEN }}" ^
             -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+        shell: cmd
