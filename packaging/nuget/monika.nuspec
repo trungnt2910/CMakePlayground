@@ -10,6 +10,7 @@
     <tags>Windows Pico LxMonika Monika WSL SDK native</tags>
     <copyright>Copyright (c) MONIKA_BUILD_COPYRIGHT_YEARS MONIKA_BUILD_AUTHOR</copyright>
     <license type="expression">MIT</license>
+    <readme>README.md</readme>
     <projectUrl>https://go.trungnt2910.com/lxmonika</projectUrl>
     <repository type="git" url=MONIKA_QUOTED_BUILD_ORIGIN commit=MONIKA_QUOTED_BUILD_HASH_FULL />
     <packageTypes>
