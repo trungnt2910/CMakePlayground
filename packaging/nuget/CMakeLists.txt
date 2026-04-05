@@ -34,7 +34,7 @@ function(monika_add_processed_xml target input output)
         DEPENDS
             UpdateBuildProps
             "${input}"
-            ${MONIKA_BUILD_PROPS_FILES}
+            ${MONIKA_BUILD_PROPS_H}
         COMMENT "Processing XML file ${INPUT_FILE_NAME}"
         VERBATIM
     )
