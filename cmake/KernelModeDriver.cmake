@@ -53,7 +53,7 @@ find_program(CERTMGR_EXECUTABLE
     REQUIRED
 )
 
-set(MONIKA_CERT_NAME "WDKTestCert" CACHE STRING "The name of the certificate for signing drivers" )
+set(MONIKA_CERT_NAME "WDKTestCert" CACHE STRING "The name of the certificate for signing drivers")
 
 function(add_driver name)
     set(DRIVER_SRCS "")
