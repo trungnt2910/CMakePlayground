@@ -48,9 +48,9 @@ function(monika_add_processed_xml target input output)
 endfunction()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(MONIKA_NUGET_PACKAGE_ID "monika.Debug")
+    set(MONIKA_NUGET_PACKAGE_SUFFIX ".Debug")
 else()
-    set(MONIKA_NUGET_PACKAGE_ID "monika")
+    set(MONIKA_NUGET_PACKAGE_SUFFIX "")
 endif()
 
 monika_add_processed_xml(
@@ -58,8 +58,18 @@ monika_add_processed_xml(
     "${CMAKE_CURRENT_SOURCE_DIR}/monika.nuspec"
     "${CMAKE_CURRENT_BINARY_DIR}/monika.nuspec"
     FLAGS
-        -DMONIKA_NUGET_PACKAGE_ID=${MONIKA_NUGET_PACKAGE_ID}
-        -DMONIKA_NUGET_TARGETS_PATH="build/native/${MONIKA_NUGET_PACKAGE_ID}.targets"
+        "-DMONIKA_NUGET_PACKAGE_ID=monika${MONIKA_NUGET_PACKAGE_SUFFIX}"
+)
+
+set(MONIKA_NUGET_TARGETS_PATH "build/native/monika.SDK${MONIKA_NUGET_PACKAGE_SUFFIX}.targets")
+
+monika_add_processed_xml(
+    MonikaNuGetSdkXml
+    "${CMAKE_CURRENT_SOURCE_DIR}/monika.SDK.nuspec"
+    "${CMAKE_CURRENT_BINARY_DIR}/monika.SDK.nuspec"
+    FLAGS
+        "-DMONIKA_NUGET_PACKAGE_ID=monika.SDK${MONIKA_NUGET_PACKAGE_SUFFIX}"
+        "-DMONIKA_NUGET_TARGETS_PATH=\"${MONIKA_NUGET_TARGETS_PATH}\""
 )
 
 configure_file(
@@ -72,6 +82,9 @@ add_custom_target(MonikaNuGetStub ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/monik
 monika_should_install_target(MonikaNuGetXml MONIKA_NUGET_SHOULD_INSTALL)
 if(MONIKA_NUGET_SHOULD_INSTALL)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/monika.nuspec"
+        DESTINATION "${CMAKE_INSTALL_PREFIX}"
+    )
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/monika.SDK.nuspec"
         DESTINATION "${CMAKE_INSTALL_PREFIX}"
     )
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/DotnetToolSettings.xml"
