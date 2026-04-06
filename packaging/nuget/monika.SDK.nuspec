@@ -17,9 +17,7 @@
   <files>
     <file src="..\..\LICENSE.md" />
 
-    <!-- TODO: Write a dedicated package README.md in the packaging/nuget folder. -->
-    <!-- lxmonika/README.md is specific to lxmonika, and root README.md is obviously unusable. -->
-    <file src="..\..\lxmonika\README.md" />
+    <file src="..\..\packaging\nuget\README.SDK.md" target="README.md" />
 
     <!-- Visual Studio C++ build support. -->
     <file src="..\..\packaging\nuget\monika.targets" target=MONIKA_NUGET_TARGETS_PATH />

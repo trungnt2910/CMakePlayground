@@ -20,9 +20,7 @@
   <files>
     <file src="..\..\LICENSE.md" />
 
-    <!-- TODO: Write a dedicated package README.md in the packaging/nuget folder. -->
-    <!-- monika/README.md is specific to monika CLI, and root README.md is obviously unusable. -->
-    <file src="..\..\monika\README.md" />
+    <file src="..\..\packaging\nuget\README.CLI.md" target="README.md" />
 
     <!-- dotnet tool support. -->
     <file src=".\tools\**" target="tools/" />
