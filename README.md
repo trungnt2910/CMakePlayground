@@ -21,12 +21,16 @@ builds and older C++ versions.
 
 - OS: Windows 10
 - Compiler: Latest build of [**@mstorsjo**'s `llvm-mingw`](https://github.com/mstorsjo/llvm-mingw)
-   - The `bin` folder should be in the system `PATH`.
+   - Currently a [fork](https://github.com/trungnt2910/llvm-mingw) with
+     [ARM SEH support](https://github.com/llvm/llvm-project/pull/184953) is required.
+   - The toolchain is automatically fetched by the build script.
 - Generator: `Ninja`.
 - IDE: Visual Studio Code
 - Linter: `clangd`
     - Intellisense has bugs when dealing with `wchar_t` and `std::wstring`.
-- WDK & Win10 SDK RS1 & RS4.
+- WDK & Win10 SDK.
+   - 22621 for building 32-bit targets (x86, ARM).
+   - The latest (currently tested on 26100) for building 64-bit targets (x64, ARM64).
 
 ## Supported Projects
 
@@ -40,10 +44,11 @@ builds and older C++ versions.
   - [x] `mxhost` Monix Host CLI
   - [x] `mxss` Monix Kernel Driver
   - [x] `monix` Monix Userland Subproject
+- [x] CI
 
 ## TODO
 
-- CI builds
+- Merge this repo into `lxmonika`.
 
 ## Community
 
