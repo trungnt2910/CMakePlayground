@@ -38,3 +38,7 @@ add_subdirectory(lxmonika)
 add_subdirectory(monika)
 add_subdirectory(mxss)
 add_subdirectory(packaging)
+
+# Add targets such as FeatureCore and FeatureMXSS.
+# Must always be at the very end of this file.
+monika_add_feature_targets()

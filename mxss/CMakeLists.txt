@@ -13,7 +13,3 @@ if(MONIKA_MXSS_ARCH_SUPPORTED)
     add_subdirectory(mxhost)
     add_subdirectory(mxss)
 endif()
-
-# Add targets such as FeatureCore and FeatureMXSS.
-# Must always be at the very end of this file.
-monika_add_feature_targets()

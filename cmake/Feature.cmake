@@ -40,8 +40,8 @@ endfunction()
 
 function(_monika_get_all_targets RESULT_VAR)
     macro(_monika_get_all_targets_helper TARGET_DIRECTORY RESULT_VAR)
-        get_property(targets DIRECTORY "${TARGET_DIRECTORY}" PROPERTY BUILDSYSTEM_TARGETS)
-        list(APPEND ${RESULT_VAR} ${targets})
+        get_property(current_targets DIRECTORY "${TARGET_DIRECTORY}" PROPERTY BUILDSYSTEM_TARGETS)
+        list(APPEND ${RESULT_VAR} ${current_targets})
 
         get_property(subdirs DIRECTORY "${TARGET_DIRECTORY}" PROPERTY SUBDIRECTORIES)
         foreach(dir IN LISTS subdirs)
