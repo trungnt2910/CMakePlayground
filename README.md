@@ -2,6 +2,10 @@
 
 [![Discord Invite](https://img.shields.io/discord/1185622479436251227?logo=discord&logoColor=white&label=Discord&labelColor=%235865F2)](https://discord.gg/bcV3gXGtsJ)
 
+### **This repository is no longer maintained. Changes have been integrated into [lxmonika][3].**
+
+[3]: https://github.com/trungnt2910/lxmonika
+
 A playground for moving [lxmonika](https://github.com/trungnt2910/lxmonika) to non-Microsoft build
 tools.
 
